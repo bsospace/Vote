@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
-import { Vote, LogOut, LogIn } from "lucide-react";
-// import { useAuth } from "../contexts/AuthContext";
+import { Vote } from "lucide-react";
 import { NavUser } from "@/components/NavUser";
 
 export default function Navbar() {
-  // const { user, isAdmin, signOut } = useAuth();
   const user = {
     firstName: "John",
     lastName: "Doe",
     avatar: "https://randomuser.me/api/portraits",
     email: "John@bsospace.com",
+    id: "1",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
   const appName = import.meta.env.VITE_APP_NAME;
 

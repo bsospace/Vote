@@ -2,7 +2,6 @@
 
 import {
     BadgeCheck,
-    Bell,
     CreditCard,
     LogOut,
     Sparkles,
@@ -23,7 +22,7 @@ import { IUser } from "@/interfaces/interfaces";
 export function NavUser({
     user,
     }: {
-    user: IUser;
+    readonly user: IUser;
     }) {
 
     return (

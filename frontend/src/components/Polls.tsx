@@ -8,18 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 // **Polls List Component**
-export function Polls({ polls }: { polls: IPoll[] }) {
+export function Polls({ polls }: { readonly polls: IPoll[] }) {
     return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {polls.map((poll, index) => (
-            <PollCard key={poll.id} poll={poll} index={index} />
+        {polls.map((poll) => (
+            <PollCard key={poll.id} poll={poll} />
         ))}
         </div>
     );
 }
 
 // **Poll Card Component**
-function PollCard({ poll, index }: { poll: IPoll; index: number }) {
+function PollCard({ poll }: { readonly poll: IPoll }) {
     const { user } = useAuth();
 
     // **Memoized Dates**
