@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  votes     Vote[]
+
+  @@map("users")
+}
+
+model Poll {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  pollOptions PollOption[] 
+  votes       Vote[] 
+  stats       PollStat?
+
+  @@map("polls")
+}
+
+model PollOption {
+  id          String   @id @default(uuid()) @db.Uuid
+  pollId      String   @map("poll_id") @db.Uuid  // Ensure pollId is UUID
+  title       String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  poll        Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes       Vote[]
+  stats       PollOptionStat?
+
+  @@map("poll_options")
+}
+
+model Vote {
+  id        String   @id @default(uuid()) @db.Uuid
+  pollId    String   @map("poll_id") @db.Uuid  // Ensure pollId is UUID
+  optionId  String   @map("option_id") @db.Uuid  // Ensure optionId is UUID
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId]) // Prevent multiple votes from the same user on the same poll
+  @@map("votes")
+}
+
+model PollStat {
+  id          String @id @default(uuid()) @db.Uuid
+  pollId      String @map("poll_id") @db.Uuid @unique  // Ensure pollId is UUID
+  totalVotes  Int    @default(0) // Total votes for the poll
+  uniqueUsers Int    @default(0) // Number of unique users who voted
+
+  poll        Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  @@map("poll_stats")
+}
+
+model PollOptionStat {
+  id         String @id @default(uuid()) @db.Uuid
+  optionId   String @map("option_id") @db.Uuid @unique  // Ensure optionId is UUID
+  voteCount  Int    @default(0) // Number of votes for this option
+
+  option     PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@map("poll_option_stats")
+}
