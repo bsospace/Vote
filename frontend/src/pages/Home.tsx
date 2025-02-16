@@ -53,7 +53,6 @@ export default function Home() {
             <Polls polls={polls} />
           </AccordionContent>
         </AccordionItem>
-
         <AccordionItem value="item-2" >
           <AccordionTrigger>
             <h1 className="text-3xl font-bold mb-8">Poll สาธารณะ</h1>
