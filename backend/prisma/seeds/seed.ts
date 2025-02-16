@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -81,6 +82,18 @@ async function main() {
           pollId: popularVotePoll.id,
         },
       ],
+    });
+  }
+
+  // 5️⃣ Create Guests (สำหรับการโหวต)
+  const guestCount = 10; // จำนวน Guest ที่ต้องการสร้าง
+  for (let i = 0; i < guestCount; i++) {
+    await prisma.guest.create({
+      data: {
+        name: `Guest-${i + 1}`,
+        key: randomUUID(), // ใช้ UUID เป็น Key สำหรับ Guest
+        eventId: event.id,
+      },
     });
   }
 
