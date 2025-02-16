@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { Vote, LogOut, LogIn } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+// import { useAuth } from "../hook/AuthContext";
+import { useAuth } from "@/hooks/UseAuth";
 import { Button } from "./ui/button";
 
 export default function Navbar() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user } = useAuth();
   const appName = import.meta.env.VITE_APP_NAME;
 
   return (
@@ -17,7 +18,7 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center space-x-4">
-            {user ? (
+            {/* {user ? (
               <>
                 {isAdmin && (
                   <Button asChild>
@@ -38,7 +39,7 @@ export default function Navbar() {
                   <span>Sign In</span>
                 </Link>
               </Button>
-            )}
+            )} */}
           </div>
         </div>
       </div>

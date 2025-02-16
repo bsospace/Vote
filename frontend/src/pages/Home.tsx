@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MoreHorizontal } from "lucide-react";
 import { mockPolls } from "../lib/mockData";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@/hooks/UseAuth";
+// import { useAuth } from "../contexts/AuthContext";
 import {
   Card,
   CardContent,
@@ -20,10 +21,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "@/components/AlertDialog";
-import { axiosInstance } from "@/lib/utils";
+import { axiosInstance } from "@/lib/Utils";
 
-export default function Home() {
-  const { user, isAdmin } = useAuth();
+export default function HomePage() {
+  const { user } = useAuth();
   const [polls, setPolls] = useState(mockPolls);
   const [selectedPollId, setSelectedPollId] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -74,7 +75,7 @@ export default function Home() {
 
           return (
             <React.Fragment key={poll.id}>
-              {(isAdmin || isPollActive) && (
+              {( isPollActive) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -114,7 +115,7 @@ export default function Home() {
                       <Button asChild>
                         <Link to={`/polls/${poll.id}`}>View Poll</Link>
                       </Button>
-                      {isAdmin && (
+                      {/* {( */}
                         <DropdownMenu>
                           <DropdownMenuTrigger>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -143,7 +144,7 @@ export default function Home() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      )}
+                      {/* )} */}
                     </CardFooter>
                   </Card>
                 </motion.div>
