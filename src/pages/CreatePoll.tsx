@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 interface PollOption {
   title: string;
@@ -20,6 +21,7 @@ export default function CreatePoll() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
+  const [dateTime, setDateTime] = useState<Date>();
   const [endTime, setEndTime] = useState("");
   const [options, setOptions] = useState<PollOption[]>([
     { title: "", description: "" },
@@ -108,22 +110,20 @@ export default function CreatePoll() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="startTime">Start Time *</Label>
-                <Input
-                  id="startTime"
-                  type="datetime-local"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  required
+                <DateTimePicker
+                  defaultDate={dateTime}
+                  onChange={setDateTime}
+                  minDate={new Date(2024, 0, 1)} // กำหนดวันที่ต่ำสุด
+                  maxDate={new Date(2024, 11, 31)} // กำหนดวันที่สูงสุด
                 />
               </div>
               <div>
                 <Label htmlFor="endTime">End Time *</Label>
-                <Input
-                  id="endTime"
-                  type="datetime-local"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  required
+                <DateTimePicker
+                  defaultDate={dateTime}
+                  onChange={setDateTime}
+                  minDate={new Date(2024, 0, 1)} // กำหนดวันที่ต่ำสุด
+                  maxDate={new Date(2024, 11, 31)} // กำหนดวันที่สูงสุด
                 />
               </div>
             </div>
@@ -171,7 +171,9 @@ export default function CreatePoll() {
           </CardContent>
         </Card>
         <div className="flex justify-between">
-          <Button type="button" asChild><Link to={"/"}>Back</Link></Button>
+          <Button type="button" asChild>
+            <Link to={"/"}>Back</Link>
+          </Button>
           <Button type="submit">Create Poll</Button>
         </div>
       </form>

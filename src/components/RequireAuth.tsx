@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { SkeletonCard } from "./Skeleton";
 
 interface RequireAuthProps {
   children: JSX.Element;
@@ -14,7 +15,7 @@ export default function RequireAuth({
   const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>; // หรือแสดง spinner หรืออะไรที่แสดงว่าแอปกำลังโหลด
+    return <SkeletonCard />;
   }
 
   if (!user) {
