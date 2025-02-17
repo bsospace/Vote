@@ -52,6 +52,7 @@ model Poll {
   question     String
   description  String?
   isPublic     Boolean  @default(false)
+  canEdit      Boolean  @default(false)
   startVoteAt  DateTime
   endVoteAt    DateTime
   isVoteEnd    Boolean  @default(false)
@@ -89,11 +90,11 @@ model Option {
 
 model WhitelistUser {
   id       String  @id @default(uuid())
-  userId   String  @unique
+  userId   String
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  eventId  String? @unique
+  eventId  String?
   event    Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  pollId   String? @unique
+  pollId   String?
   poll     Poll?   @relation(fields: [pollId], references: [id], onDelete: Cascade)
   point    Int     @default(0)
 
@@ -101,15 +102,17 @@ model WhitelistUser {
   updatedAt  DateTime @updatedAt
   deletedAt  DateTime?
   dataLogs   Json?
+
+  @@unique([userId, eventId])
 }
 
 model Guest {
   id      String  @id @default(uuid())
   name    String
-  key     String  @unique
-  eventId String? // Guest อาจมีหรือไม่มี Event
+  key     String
+  eventId String?
   event   Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  pollId  String? // Guest อาจมีหรือไม่มี Poll
+  pollId  String?
   poll    Poll?   @relation(fields: [pollId], references: [id], onDelete: Cascade)
 
   votes   Vote[]
@@ -123,9 +126,9 @@ model Guest {
 
 model VoteRestriction {
   id        String  @id @default(uuid())
-  userId    String? @unique
+  userId    String? 
   user      User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  guestId   String? @unique
+  guestId   String? 
   guest     Guest?  @relation(fields: [guestId], references: [id], onDelete: Cascade)
   pollId    String
   poll      Poll    @relation(fields: [pollId], references: [id], onDelete: Cascade)
@@ -144,9 +147,9 @@ model Vote {
   poll       Poll    @relation(fields: [pollId], references: [id], onDelete: Cascade)
   optionId   String
   option     Option  @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  userId     String? @unique
+  userId     String? 
   user       User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  guestId    String? @unique
+  guestId    String?
   guest      Guest?  @relation(fields: [guestId], references: [id], onDelete: Cascade)
   
   createdAt  DateTime @default(now())

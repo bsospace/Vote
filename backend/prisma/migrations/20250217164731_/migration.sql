@@ -35,6 +35,7 @@ CREATE TABLE "Poll" (
     "question" TEXT NOT NULL,
     "description" TEXT,
     "isPublic" BOOLEAN NOT NULL DEFAULT false,
+    "canEdit" BOOLEAN NOT NULL DEFAULT false,
     "startVoteAt" TIMESTAMP(3) NOT NULL,
     "endVoteAt" TIMESTAMP(3) NOT NULL,
     "isVoteEnd" BOOLEAN NOT NULL DEFAULT false,
@@ -127,28 +128,7 @@ CREATE TABLE "Vote" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "WhitelistUser_userId_key" ON "WhitelistUser"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "WhitelistUser_eventId_key" ON "WhitelistUser"("eventId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "WhitelistUser_pollId_key" ON "WhitelistUser"("pollId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Guest_key_key" ON "Guest"("key");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VoteRestriction_userId_key" ON "VoteRestriction"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VoteRestriction_guestId_key" ON "VoteRestriction"("guestId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Vote_userId_key" ON "Vote"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Vote_guestId_key" ON "Vote"("guestId");
+CREATE UNIQUE INDEX "WhitelistUser_userId_eventId_key" ON "WhitelistUser"("userId", "eventId");
 
 -- AddForeignKey
 ALTER TABLE "Event" ADD CONSTRAINT "Event_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

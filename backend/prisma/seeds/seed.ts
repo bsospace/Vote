@@ -3,108 +3,178 @@ import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("🌱 Seeding database for OSSD#13...");
-
-  // 1️⃣ Create Admin User (Organizer)
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@ossd13.com" },
-    update: {},
-    create: {
-      firstName: "Admin",
-      lastName: "OSSD",
-      email: "admin@ossd13.com",
-      avatar: "https://via.placeholder.com/150",
-    },
-  });
-
-  // 2️⃣ Create Event for OSSD#13
-  const event = await prisma.event.create({
-    data: {
-      name: "OSSD#13",
-      description: "งานค่าย OSSD ครั้งที่ 13",
-      userId: admin.id,
-    },
-  });
-
-  // 3️⃣ Create Polls (Best Presentation & Popular Vote)
-  const bestPresentationPoll = await prisma.poll.create({
-    data: {
-      question: "ทีมไหนมีการนำเสนอที่ดีที่สุด?",
-      description: "โหวต Best Presentation สำหรับ OSSD#13",
-      isPublic: true,
-      startVoteAt: new Date(),
-      endVoteAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // โหวตได้ภายใน 2 วัน
-      isVoteEnd: false,
-      eventId: event.id,
-      userId: admin.id,
-    },
-  });
-
-  const popularVotePoll = await prisma.poll.create({
-    data: {
-      question: "ทีมไหนได้รับความนิยมสูงสุด?",
-      description: "โหวต Popular Vote สำหรับ OSSD#13",
-      isPublic: true,
-      startVoteAt: new Date(),
-      endVoteAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-      isVoteEnd: false,
-      eventId: event.id,
-      userId: admin.id,
-    },
-  });
-
-  // 4️⃣ Add Options for Each Poll (ใช้ข้อมูล names)
-  const clusters = [
-    { id: 0, cluster: "Cluster 0", company: "Clicknext Bangsean", color1: "#002449", color2: "#868990", img: "/src/assets/images/logo_cluster/logo-cluster-0.png" },
-    { id: 1, cluster: "Cluster 1", company: "นางฟ้าบางแสน", color1: "#360305", color2: "#F6AC1E", img: "/src/assets/images/logo_cluster/logo-cluster-1.png" },
-    { id: 2, cluster: "Cluster 2", company: "TTT Brother", color1: "#000000", color2: "#FFFFFF", img: "/src/assets/images/logo_cluster/logo-cluster-2.png" },
-    { id: 3, cluster: "Cluster 3", company: "Clicknext Bangkok", color1: "#2F275F", color2: "#2D3087", img: "/src/assets/images/logo_cluster/logo-cluster-3.png" },
-    { id: 4, cluster: "Cluster 4", company: "IV Soft", color1: "#939599", color2: "#EFAB00", img: "/src/assets/images/logo_cluster/logo-cluster-4.png" },
-    { id: 5, cluster: "Cluster 5", company: "TTT Brother", color1: "#5B8CDD", color2: "#BD73BF", img: "/src/assets/images/logo_cluster/logo-cluster-5.png" },
-    { id: 6, cluster: "Cluster 6", company: "Clicknext Bangkok", color1: "#6996B7", color2: "#E00024", img: "/src/assets/images/logo_cluster/logo-cluster-6.png" },
-    { id: 7, cluster: "Cluster 7", company: "นางฟ้าบางแสน", color1: "#000000", color2: "#017F8D", img: "/src/assets/images/logo_cluster/logo-cluster-7.png" },
-    { id: 8, cluster: "Cluster 8", company: "IV Soft", color1: "#000000", color2: "#D72027", img: "/src/assets/images/logo_cluster/logo-cluster-8.png" },
-    { id: 9, cluster: "Cluster 9", company: "Clicknext Bangsean", color1: "#232323", color2: "#FFFFFF", img: "/src/assets/images/logo_cluster/logo-cluster-9.png" },
-  ];
-
-  for (const cluster of clusters) {
-    await prisma.option.createMany({
-      data: [
-        {
-          text: `${cluster.cluster} - ${cluster.company}`,
-          banner: cluster.img,
-          pollId: bestPresentationPoll.id,
-        },
-        {
-          text: `${cluster.cluster} - ${cluster.company}`,
-          banner: cluster.img,
-          pollId: popularVotePoll.id,
-        },
-      ],
-    });
-  }
-
-  // 5️⃣ Create Guests (สำหรับการโหวต)
-  const guestCount = 10; // จำนวน Guest ที่ต้องการสร้าง
-  for (let i = 0; i < guestCount; i++) {
-    await prisma.guest.create({
-      data: {
-        name: `Guest-${i + 1}`,
-        key: randomUUID(), // ใช้ UUID เป็น Key สำหรับ Guest
-        eventId: event.id,
-      },
-    });
-  }
-
-  console.log("✅ Seeding complete for OSSD#13!");
+function getRandomDateInPastDays(days = 30) {
+  const now = new Date();
+  const pastDate = new Date(now.getTime() - Math.random() * days * 24 * 60 * 60 * 1000);
+  return pastDate;
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Error seeding database:", e);
+async function main() {
+  console.log("🌱 Seeding database...");
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      // 1️⃣ Create Users
+      const users = await Promise.all(
+        ["admin@ossd13.com", "user1@example.com", "user2@example.com", "user3@example.com", "user4@example.com", "user5@example.com", "user6@example.com", "user7@example.com"].map(
+          async (email, index) =>
+            prisma.user.upsert({
+              where: { email },
+              update: {},
+              create: {
+                firstName: `User${index + 1}`,
+                lastName: "Test",
+                email,
+                avatar: `https://via.placeholder.com/150?text=User${index + 1}`,
+              },
+            })
+        )
+      );
+
+      const admin = users[0];
+
+      // 2️⃣ Create Events
+      const events = await Promise.all(
+        ["OSSD#13", "Tech Conference", "Hackathon", "AI Summit", "Cybersecurity Forum", "Web Dev Expo", "Data Science Meetup"].map(async (name) =>
+          prisma.event.create({
+            data: {
+              name,
+              description: `Description for ${name}`,
+              userId: admin.id,
+              createdAt: getRandomDateInPastDays(90),
+            },
+          })
+        )
+      );
+
+      // 3️⃣ Create Polls
+      const polls = await Promise.all(
+        events.map(async (event) => {
+          const startVoteAt = getRandomDateInPastDays(60);
+          return prisma.poll.create({
+            data: {
+              question: `Poll for ${event.name}`,
+              description: `Vote on ${event.name}`,
+              isPublic: true,
+              startVoteAt,
+              endVoteAt: new Date(startVoteAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000),
+              isVoteEnd: false,
+              eventId: event.id,
+              userId: admin.id,
+            },
+          });
+        })
+      );
+
+      // 4️⃣ Create Options for Each Poll
+      const options = await Promise.all(
+        polls.flatMap((poll) =>
+          ["Option A", "Option B", "Option C", "Option D", "Option E"].map((text) =>
+            prisma.option.create({
+              data: {
+                text,
+                pollId: poll.id,
+              },
+            })
+          )
+        )
+      );
+
+      // 5️⃣ Create Whitelist Users
+      const whitelistUsers = await Promise.all(
+        users.slice(1).map(async (user) => {
+          let event;
+          let retries = 10;
+          do {
+            event = events[Math.floor(Math.random() * events.length)];
+            retries--;
+          } while (await prisma.whitelistUser.findUnique({ where: { userId_eventId: { userId: user.id, eventId: event.id } } }) && retries > 0);
+          
+          return prisma.whitelistUser.upsert({
+            where: {
+              userId_eventId: {
+                userId: user.id,
+                eventId: event.id,
+              },
+            },
+            update: {},
+            create: {
+              userId: user.id,
+              eventId: event.id,
+              point: Math.floor(Math.random() * 10),
+            },
+          });
+        })
+      );
+
+      // 6️⃣ Create Guests
+      const guests = await Promise.all(
+        Array.from({ length: 15 }).map((_, i) => {
+          const event = events[Math.floor(Math.random() * events.length)];
+          return prisma.guest.create({
+            data: {
+              name: `Guest-${i + 1}`,
+              key: `GUEST-${(i + 1).toString().padStart(3, '0')}-${randomUUID().slice(0, 8).toUpperCase()}`,
+              eventId: event.id,
+            },
+          });
+        })
+      );
+
+      // 7️⃣ Create Votes
+      const votes = await Promise.all(
+        users.flatMap((user) =>
+          options.map((option) =>
+            prisma.vote.create({
+              data: {
+                pollId: option.pollId,
+                optionId: option.id,
+                userId: user.id,
+                guestId: null,
+                createdAt: getRandomDateInPastDays(30),
+              },
+            })
+          )
+        ).concat(
+          guests.flatMap((guest) =>
+            options.map((option) =>
+              prisma.vote.create({
+                data: {
+                  pollId: option.pollId,
+                  optionId: option.id,
+                  userId: null,
+                  guestId: guest.id,
+                  createdAt: getRandomDateInPastDays(30),
+                },
+              })
+            )
+          )
+        )
+      );
+
+      // 8️⃣ Create Vote Restrictions
+      const voteRestrictions = await Promise.all(
+        options.map((option) =>
+          prisma.voteRestriction.create({
+            data: {
+              userId: Math.random() > 0.5 ? users[Math.floor(Math.random() * users.length)].id : null,
+              guestId: Math.random() > 0.5 ? guests[Math.floor(Math.random() * guests.length)].id : null,
+              pollId: option.pollId,
+              optionId: option.id,
+              createdAt: getRandomDateInPastDays(30),
+            },
+          })
+        )
+      );
+    });
+
+    console.log("✅ Seeding complete!");
+  } catch (e) {
+    console.error("❌ Error seeding database, rolling back:", e);
     process.exit(1);
-  })
-  .finally(async () => {
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}
+
+main();
