@@ -8,19 +8,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { useAuth } from "../contexts/AuthContext";
-import { axiosInstance } from "@/lib/utils";
-import { IPoll } from "@/interfaces/interfaces";
+import { axiosInstance } from "@/lib/Utils";
+import { IPoll } from "@/interfaces/Interfaces";
 import { Polls } from "@/components/Polls";
 
 export default function Home() {
-  const { user } = useAuth();
   const [polls, setPolls] = useState<IPoll[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchPolls();
-  }, [user]);
+  }, []);
 
   const fetchPolls = async () => {
     setIsLoading(true);
