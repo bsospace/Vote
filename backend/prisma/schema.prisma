@@ -8,78 +8,149 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid())
+  firstName  String
+  lastName   String
+  email      String   @unique
+  avatar     String?
+  events     Event[]   @relation("EventOwner")
+  polls      Poll[]    @relation("PollOwner")
+  whitelist  WhitelistUser[]
+  votes      Vote[]
+  userVotes  VoteRestriction[]
 
-  votes     Vote[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
+}
 
-  @@map("users")
+model Event {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  owner       User     @relation("EventOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  polls       Poll[]
+  whitelist   WhitelistUser[]
+  guests      Guest[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
 }
 
 model Poll {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String
-  description String?
-  startTime   DateTime @map("start_time")
-  endTime     DateTime @map("end_time")
-  createdBy   String   @map("created_by") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  eventId      String?  
+  event        Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  userId       String
+  owner        User     @relation("PollOwner", fields: [userId], references: [id], onDelete: Cascade)
 
-  pollOptions PollOption[] 
-  votes       Vote[] 
-  stats       PollStat?
+  question     String
+  description  String?
+  isPublic     Boolean  @default(false)
+  startVoteAt  DateTime
+  endVoteAt    DateTime
+  isVoteEnd    Boolean  @default(false)
+  banner       String?
+  publishedAt  DateTime?
 
-  @@map("polls")
+  options      Option[]
+  whitelist    WhitelistUser[]
+  votes        Vote[]
+  guestVotes   Guest[]
+  voteRestrict VoteRestriction[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
 }
 
-model PollOption {
-  id          String   @id @default(uuid()) @db.Uuid
-  pollId      String   @map("poll_id") @db.Uuid  // Ensure pollId is UUID
-  title       String
+model Option {
+  id          String  @id @default(uuid())
+  text        String
+  banner      String?
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
+  pollId      String
+  poll        Poll    @relation(fields: [pollId], references: [id], onDelete: Cascade)
 
-  poll        Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
   votes       Vote[]
-  stats       PollOptionStat?
+  voteRestrict VoteRestriction[]
 
-  @@map("poll_options")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
+}
+
+model WhitelistUser {
+  id       String  @id @default(uuid())
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId  String? @unique
+  event    Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  pollId   String? @unique
+  poll     Poll?   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  point    Int     @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
+}
+
+model Guest {
+  id      String  @id @default(uuid())
+  name    String
+  key     String  @unique
+  eventId String? // Guest อาจมีหรือไม่มี Event
+  event   Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  pollId  String? // Guest อาจมีหรือไม่มี Poll
+  poll    Poll?   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  votes   Vote[]
+  guestVotes VoteRestriction[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
+}
+
+model VoteRestriction {
+  id        String  @id @default(uuid())
+  userId    String? @unique
+  user      User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestId   String? @unique
+  guest     Guest?  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  pollId    String
+  poll      Poll    @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId  String
+  option    Option  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
 }
 
 model Vote {
-  id        String   @id @default(uuid()) @db.Uuid
-  pollId    String   @map("poll_id") @db.Uuid  // Ensure pollId is UUID
-  optionId  String   @map("option_id") @db.Uuid  // Ensure optionId is UUID
-  userId    String   @map("user_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at")
-
-  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([pollId, userId]) // Prevent multiple votes from the same user on the same poll
-  @@map("votes")
-}
-
-model PollStat {
-  id          String @id @default(uuid()) @db.Uuid
-  pollId      String @map("poll_id") @db.Uuid @unique  // Ensure pollId is UUID
-  totalVotes  Int    @default(0) // Total votes for the poll
-  uniqueUsers Int    @default(0) // Number of unique users who voted
-
-  poll        Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
-
-  @@map("poll_stats")
-}
-
-model PollOptionStat {
-  id         String @id @default(uuid()) @db.Uuid
-  optionId   String @map("option_id") @db.Uuid @unique  // Ensure optionId is UUID
-  voteCount  Int    @default(0) // Number of votes for this option
-
-  option     PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-
-  @@map("poll_option_stats")
+  id         String  @id @default(uuid())
+  pollId     String
+  poll       Poll    @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId   String
+  option     Option  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId     String? @unique
+  user       User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestId    String? @unique
+  guest      Guest?  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  dataLogs   Json?
 }
