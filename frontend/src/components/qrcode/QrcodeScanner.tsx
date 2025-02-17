@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import QrScanner from 'qr-scanner';
 import 'tailwindcss/tailwind.css';
 
-interface QRScannerProps {}
+interface QRScannerProps {
+    onResult: (result: any) => void;
+  }
 
 const QRScanner: React.FC<QRScannerProps> = () => {
     const videoElementRef = useRef<HTMLVideoElement | null>(null);
