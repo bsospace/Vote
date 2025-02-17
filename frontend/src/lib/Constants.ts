@@ -2,7 +2,7 @@ export const APP_NAME = 'React Enterprise App';
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/login',
+    LOGIN: '/auth/guest',
     REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
     ME: '/auth/me',
