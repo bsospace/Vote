@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Vote, LogOut, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/UseAuth";
-import { Button } from "./ui/button";
+import { NavUser } from "./NavUser";
+import { IUser } from "@/interfaces/Interfaces";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center space-x-4">
-            <NavUser user={user} />
+            <NavUser user={user as IUser} />
           </div>
         </div>
       </div>

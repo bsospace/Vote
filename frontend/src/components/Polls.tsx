@@ -1,6 +1,6 @@
-import { IPoll } from "@/interfaces/interfaces";
+import { IPoll } from "@/interfaces/Interfaces";
 import { DateFormatFull, DateFormatFullTime } from "@/lib/DateFormat";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/UseAuth";
 import { Link } from "react-router-dom";
 import { CalendarCheck, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";

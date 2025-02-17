@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Calendar, Clock, Users } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/UseAuth";
 import { mockPolls, mockPollOptions, mockVotes } from "../lib/mockData";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
