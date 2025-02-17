@@ -8,7 +8,7 @@ import React, {
   import { axiosInstance } from '@/lib/Utils'
   import { API_ENDPOINTS } from '@/lib/Constants'
   import { config } from '@/config/Config'
-  import { IUser } from '@/interfaces/Interfaces'
+  import { IUser } from '@/interfaces/interfaces'
 
   interface User extends IUser {
     isGuest: boolean
