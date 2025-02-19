@@ -329,7 +329,7 @@ export class PollService {
                 }
             });
 
-            
+
             const formattedPolls = polls.map((poll) => ({
                 ...poll,
                 description: poll.description || undefined,
@@ -396,17 +396,19 @@ export class PollService {
      * @returns - boolean
      */
 
-    public async userCanVote(pollId: string, userId: string, isGuest: boolean) {
+    public async userCanVote(pollId: string, userId: string, isGuest: boolean): Promise<boolean> {
         try {
 
-            console.log("pollId", pollId);
-            console.log("userId", userId);
-            console.log("isGuest", isGuest);
-
+            // Check if user is a guest
             if (isGuest) {
-                const vote = await this.prisma.event.findFirst({
+                const event = await this.prisma.event.findFirst({
                     where: {
-                        id: pollId,
+                        polls: {
+                            some: {
+                                id: pollId,
+                                isVoteEnd: false, 
+                            }
+                        },
                         guests: {
                             some: {
                                 id: userId,
@@ -415,24 +417,26 @@ export class PollService {
                         }
                     }
                 });
+
+                return !!event; 
             }
 
-            const vote = await this.prisma.poll.findFirst({
+            // Check if user is a participant
+            const canVote = await this.prisma.poll.findFirst({
                 where: {
                     id: pollId,
+                    isVoteEnd: false,
                     whitelist: {
                         some: {
                             userId: userId,
                             deletedAt: null,
                         }
-                    }
+                    },
+                    deletedAt: null,
                 }
-            })
+            });
 
-
-            if (!vote) {
-                return false;
-            }
+            return !!canVote;
 
         } catch (error) {
             console.error("[ERROR] userCanVote:", error);
