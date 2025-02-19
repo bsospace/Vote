@@ -15,43 +15,29 @@ export class PollService {
      * @param search - string
      * @param logs - boolean
      */
-
-    public async getPolls(
-        page: number = 1,
-        pageSize: number = 10,
-        search?: string,
-        logs?: boolean
-    ) {
+    public async getPolls(page: number = 1, pageSize: number = 10, search?: string, logs?: boolean) {
         try {
-
             const skip = (page - 1) * pageSize;
-            const take = pageSize;
 
             const whereCondition = {
                 deletedAt: null,
-                ...(search && {
-                    name: { contains: search, mode: "insensitive" },
-                }),
+                ...(search && { name: { contains: search, mode: "insensitive" } }),
             };
 
-            const polls = await this.prisma.poll.findMany({
-                where: whereCondition,
-                skip,
-                take,
-                orderBy: { createdAt: "desc" },
-            });
+            const [polls, totalCount] = await Promise.all([
+                this.prisma.poll.findMany({
+                    where: whereCondition,
+                    skip,
+                    take: pageSize,
+                    orderBy: { createdAt: "desc" },
+                }),
+                this.prisma.poll.count({ where: whereCondition }),
+            ]);
 
-            const totalCount = await this.prisma.poll.count({ where: whereCondition });
-
-            const formattedPolls = polls.map((poll) => {
-                return {
-                    ...poll,
-                    description: poll.description ?? undefined,
-                    dataLogs: logs ? (poll.dataLogs as unknown) : undefined,
-                };
-            });
-
-            return { polls: formattedPolls, totalCount };
+            return {
+                polls: this.formatPolls(polls, logs),
+                totalCount,
+            };
         } catch (error) {
             console.error("[ERROR] getPolls:", error);
             throw new Error("Failed to fetch polls");
@@ -60,241 +46,23 @@ export class PollService {
 
     /**
      * Get all polls where user is a participant or guest
-     * @param userId - string
-     * @param isGuest - boolean
-     * @returns - IPoll[]
      */
-
     public async myPolls(userId: string, isGuest: boolean, logs?: boolean): Promise<{ polls: IPoll[] }> {
         try {
-
-            let polls: IPoll[] = [];
-
-            // Check if user is a guest
-            if (isGuest) {
-
-                // Fetch event where user is a guest
-                const event = await this.prisma.event.findFirst({
-                    where: {
-                        guests: {
-                            some: {
-                                id: userId,
-                                deletedAt: null,
-                            }
-                        }
-                    }
-                });
-
-
-                if (!event) {
-                    return { polls: [] };
-                }
-
-                // Fetch polls where user is a guest
-                const rawPolls = await this.prisma.poll.findMany({
-                    where: {
-                        eventId: event.id,
-                        deletedAt: null,
-                        isVoteEnd: false,
-                    },
-                    include: {
-                        event: true,
-                    }
-                });
-
-                // Format polls data
-                polls = rawPolls.map(poll => ({
-                    ...poll,
-                    description: poll.description ?? undefined,
-                    banner: poll.banner ?? undefined,
-                    dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | undefined) ?? undefined : undefined,
-                    event: poll.event ? {
-                        ...poll.event,
-                        description: poll.event.description ?? undefined,
-                        dataLogs: (poll.event.dataLogs as unknown as DataLog[] | null) ?? undefined,
-                    } : undefined,
-                }));
-            }
-
-            // Check if user is a participant
-            if (!isGuest) {
-
-                // Fetch event where user is a participant
-                const event = await this.prisma.event.findFirst({
-                    where: {
-                        whitelist: {
-                            some: {
-                                userId: userId,
-                                deletedAt: null,
-                            }
-                        }
-                    },
-                });
-
-                if (!event) {
-                    return { polls: [] };
-                }
-
-                // Fetch polls where user is a participant
-                const rawPolls = await this.prisma.poll.findMany({
-                    where: {
-                        eventId: event.id,
-                        deletedAt: null,
-                        isVoteEnd: false,
-                    },
-                    include: {
-                        event: true,
-                    }
-                });
-
-                // Format polls data
-                polls = rawPolls.map(poll => ({
-                    ...poll,
-                    description: poll.description ?? undefined,
-                    banner: poll.banner ?? undefined,
-                    dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | null) ?? undefined : undefined,
-                    event: poll.event ? {
-                        ...poll.event,
-                        description: poll.event.description ?? undefined,
-                        dataLogs: (poll.event.dataLogs as unknown as DataLog[] | null) ?? undefined,
-                    } : undefined,
-                }));
-            }
-            
-            return { polls };
-        } catch (error) {
-            console.error("[ERROR] myPolls:", error);
-            throw new Error("Failed to fetch polls");
-        }
-    }
-
-
-    public async myVotedPolls(userId: string, isGuest: boolean, logs?: boolean): Promise<{ polls: IPoll[] }> {
-        try {
-
-            let polls: IPoll[] = [];
-
-            if (isGuest) {
-                const event = await this.prisma.event.findFirst({
-                    where: {
-                        guests: {
-                            some: {
-                                id: userId,
-                                deletedAt: null,
-                            }
-                        }
-                    }
-                });
-
-                if (!event) {
-                    return { polls: [] };
-                }
-
-                const rawPolls = await this.prisma.poll.findMany({
-                    where: {
-                        eventId: event.id,
-                        deletedAt: null,
-                        isVoteEnd: true,
-                    },
-                    include: {
-                        votes: {
-                            where: {
-                                userId: userId,
-                                deletedAt: null,
-                            }
-                        }
-                    }
-                });
-
-                polls = rawPolls.map(poll => ({
-                    ...poll,
-                    description: poll.description ?? undefined,
-                    banner: poll.banner ?? undefined,
-                    dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | null) ?? undefined : undefined,
-                    votes: poll.votes.map(vote => ({
-                        ...vote,
-                        dataLogs: (vote.dataLogs as unknown as DataLog[] | null) ?? undefined,
-                    })),
-                }));
-            }
-
-            if (!isGuest) {
-                const event = await this.prisma.event.findFirst({
-                    where: {
-                        whitelist: {
-                            some: {
-                                userId: userId,
-                                deletedAt: null,
-                            }
-                        }
-                    },
-                    include: {
-                        polls: {
-                            where: {
-                                isVoteEnd: true,
-                            },
-                            include: {
-                                votes: {
-                                    where: {
-                                        userId: userId,
-                                        deletedAt: null,
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                if (!event) {
-                    return { polls: [] };
-                }
-            }
-
-
-            const rawPolls = await this.prisma.poll.findMany({
-                where: {
-                    whitelist: {
-                        some: {
-                            userId: userId,
-                            deletedAt: null,
-                        },
-
-                    },
-                    deletedAt: null,
-                    isVoteEnd: true,
-                },
-
-                include: {
-                    votes: {
-                        where: {
-                            userId: userId,
-                            deletedAt: null,
-                        }
-                    },
-                    event: true,
-                }
+            const event = await this.prisma.event.findFirst({
+                where: isGuest
+                    ? { guests: { some: { id: userId, deletedAt: null } } }
+                    : { whitelist: { some: { userId: userId, deletedAt: null } } },
             });
 
+            if (!event) return { polls: [] };
 
-            polls = rawPolls.map(poll => ({
-                ...poll,
-                description: poll.description ?? undefined,
-                banner: poll.banner ?? undefined,
-                dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | null) ?? undefined : undefined,
-                event: poll.event ? {
-                    ...poll.event,
-                    description: poll.event.description ?? undefined,
-                    dataLogs: (poll.event.dataLogs as unknown as DataLog[] | null) ?? undefined,
+            const rawPolls = await this.prisma.poll.findMany({
+                where: { eventId: event.id, deletedAt: null, isVoteEnd: false },
+                include: { event: true },
+            });
 
-                } : undefined,
-                votes: poll.votes.map(vote => ({
-                    ...vote,
-                    dataLogs: (vote.dataLogs as unknown as DataLog[] | null) ?? undefined,
-                })),
-            }));
-
-            return { polls: polls };
-
+            return { polls: this.formatPolls(rawPolls, logs) };
         } catch (error) {
             console.error("[ERROR] myPolls:", error);
             throw new Error("Failed to fetch polls");
@@ -302,19 +70,30 @@ export class PollService {
     }
 
     /**
-     * Get all public polls
-     * @param page - number
-     * @param pageSize - number
-     * @param search - string
-     * @param logs - boolean
-     * @returns - IPoll[]
+     * Get all polls where user has voted
      */
+    public async myVotedPolls(userId: string, isGuest: boolean, logs?: boolean): Promise<{ polls: IPoll[] }> {
+        try {
+            const rawPolls = await this.prisma.poll.findMany({
+                where: {
+                    deletedAt: null,
+                    isVoteEnd: true,
+                    votes: { some: { userId: userId, deletedAt: null } },
+                },
+                include: { votes: true, event: true },
+            });
 
-    public async publicPolls(
-        page: number = 1,
-        pageSize?: number,
-        search?: string,
-        logs?: boolean) {
+            return { polls: this.formatPolls(rawPolls, logs) };
+        } catch (error) {
+            console.error("[ERROR] myVotedPolls:", error);
+            throw new Error("Failed to fetch voted polls");
+        }
+    }
+
+    /**
+     * Get all public polls
+     */
+    public async publicPolls(page: number = 1, pageSize?: number, search?: string, logs?: boolean) {
         try {
             const skip = pageSize ? (page - 1) * pageSize : undefined;
             const take = pageSize || undefined;
@@ -323,10 +102,7 @@ export class PollService {
                 deletedAt: null,
                 isPublic: true,
                 isVoteEnd: false,
-                ...(search && {
-                    name: { contains: search, mode: "insensitive" },
-                }),
-
+                ...(search && { name: { contains: search, mode: "insensitive" } }),
             };
 
             const polls = await this.prisma.poll.findMany({
@@ -334,26 +110,10 @@ export class PollService {
                 skip,
                 take,
                 orderBy: { createdAt: "desc" },
-                include: {
-                    event: true,
-                }
+                include: { event: true },
             });
 
-
-            const formattedPolls = polls.map((poll) => ({
-                ...poll,
-                description: poll.description || undefined,
-                dataLogs: logs ? poll.dataLogs : undefined,
-                event: poll.event
-                    ? {
-                        ...poll.event,
-                        description: poll.event.description || undefined,
-                        dataLogs: logs ? poll.event.dataLogs : undefined,
-                    }
-                    : null,
-            }));
-
-            return formattedPolls;
+            return this.formatPolls(polls, logs);
         } catch (error) {
             console.error("[ERROR] publicPolls:", error);
             throw new Error("Failed to fetch public polls");
@@ -361,18 +121,20 @@ export class PollService {
     }
 
     /**
-     * Get a poll by ID
-     * @param pollId - string
-     * @returns - IPoll
-     * @throws - Error
+     * Get a single poll by ID
      */
-    public async getPoll(pollId: string) {
+    public async getPoll(pollId: string, userId: string, isGuest: boolean) {
         try {
             const poll = await this.prisma.poll.findFirst({
                 where: { id: pollId, deletedAt: null },
                 include: {
                     options: true,
-                    votes: true,
+                    event: {
+                        include: {
+                            whitelist: isGuest ? undefined : { where: { userId: userId, deletedAt: null }},
+                            guests: isGuest ? { where: { id: userId, deletedAt: null } } : undefined,
+                        },
+                    },
                 },
             });
 
@@ -381,17 +143,7 @@ export class PollService {
                 return null;
             }
 
-            // count total votes
-
-            poll.options = poll.options.map((option) => {
-                const votes = poll.votes.filter((vote) => vote.optionId === option.id);
-                return {
-                    ...option,
-                    votes: votes.length,
-                };
-            });
-
-            return poll;
+            return this.formatPoll(poll);
         } catch (error) {
             console.error("[ERROR] getPoll:", error);
             throw new Error("Failed to fetch poll");
@@ -400,60 +152,50 @@ export class PollService {
 
     /**
      * Check if user can vote
-     * @param pollId - string
-     * @param userId - string
-     * @param isGuest - boolean
-     * @returns - boolean
      */
-
     public async userCanVote(pollId: string, userId: string, isGuest: boolean): Promise<boolean> {
         try {
-
-            // Check if user is a guest
-            if (isGuest) {
-                const event = await this.prisma.event.findFirst({
-                    where: {
-                        polls: {
-                            some: {
-                                id: pollId,
-                                isVoteEnd: false,
-                            }
-                        },
-                        guests: {
-                            some: {
-                                id: userId,
-                                deletedAt: null,
-                            }
-                        }
-                    }
-                });
-
-                return !!event;
-            }
-
-            // Check if user is a participant
             const canVote = await this.prisma.event.findFirst({
                 where: {
-                    polls: {
-                        some: {
-                            id: pollId,
-                            isVoteEnd: false,
-                        }
-                    },
-                    whitelist: {
-                        some: {
-                            userId: userId,
-                            deletedAt: null,
-                        }
-                    }
-                }
+                    polls: { some: { id: pollId, isVoteEnd: false } },
+                    ...(isGuest
+                        ? { guests: { some: { id: userId, deletedAt: null } } }
+                        : { whitelist: { some: { userId: userId, deletedAt: null } } }),
+                },
             });
-            
-            return !!canVote;
 
+            return !!canVote;
         } catch (error) {
             console.error("[ERROR] userCanVote:", error);
             throw new Error("Failed to check user vote");
         }
+    }
+
+    /**
+     * 🛠 Helper function to format poll results
+     */
+    private formatPolls(polls: any[], logs?: boolean): IPoll[] {
+        return polls.map(poll => this.formatPoll(poll, logs));
+    }
+
+    private formatPoll(poll: any, logs?: boolean): IPoll {
+        return {
+            ...poll,
+            description: poll.description ?? undefined,
+            banner: poll.banner ?? undefined,
+            dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | null) ?? undefined : undefined,
+            options: poll.options?.map((option: { description: string; banner: string; }) => ({
+                ...option,
+                description: option.description ?? undefined,
+                banner: option.banner ?? undefined,
+            })) ?? [],
+            event: poll.event
+                ? {
+                      ...poll.event,
+                      description: poll.event.description ?? undefined,
+                      dataLogs: (poll.event.dataLogs as unknown as DataLog[] | null) ?? undefined,
+                  }
+                : undefined,
+        };
     }
 }
