@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { DataLog, IEvent, IPoll } from "../interface";
+import { DataLog, IPoll } from "../interface";
 
 export class PollService {
     private prisma: PrismaClient;
@@ -70,7 +70,10 @@ export class PollService {
 
             let polls: IPoll[] = [];
 
+            // Check if user is a guest
             if (isGuest) {
+
+                // Fetch event where user is a guest
                 const event = await this.prisma.event.findFirst({
                     where: {
                         guests: {
@@ -87,6 +90,7 @@ export class PollService {
                     return { polls: [] };
                 }
 
+                // Fetch polls where user is a guest
                 const rawPolls = await this.prisma.poll.findMany({
                     where: {
                         eventId: event.id,
@@ -98,11 +102,12 @@ export class PollService {
                     }
                 });
 
+                // Format polls data
                 polls = rawPolls.map(poll => ({
                     ...poll,
                     description: poll.description ?? undefined,
                     banner: poll.banner ?? undefined,
-                    dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | null) ?? undefined : undefined,
+                    dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | undefined) ?? undefined : undefined,
                     event: poll.event ? {
                         ...poll.event,
                         description: poll.event.description ?? undefined,
@@ -111,16 +116,29 @@ export class PollService {
                 }));
             }
 
+            // Check if user is a participant
             if (!isGuest) {
-                const rawPolls = await this.prisma.poll.findMany({
+
+                // Fetch event where user is a participant
+                const event = await this.prisma.event.findFirst({
                     where: {
                         whitelist: {
                             some: {
                                 userId: userId,
                                 deletedAt: null,
-                            },
+                            }
+                        }
+                    },
+                });
 
-                        },
+                if (!event) {
+                    return { polls: [] };
+                }
+
+                // Fetch polls where user is a participant
+                const rawPolls = await this.prisma.poll.findMany({
+                    where: {
+                        eventId: event.id,
                         deletedAt: null,
                         isVoteEnd: false,
                     },
@@ -129,6 +147,7 @@ export class PollService {
                     }
                 });
 
+                // Format polls data
                 polls = rawPolls.map(poll => ({
                     ...poll,
                     description: poll.description ?? undefined,
@@ -140,18 +159,9 @@ export class PollService {
                         dataLogs: (poll.event.dataLogs as unknown as DataLog[] | null) ?? undefined,
                     } : undefined,
                 }));
-
             }
-
-            const formattedPolls: IPoll[] = polls.map((poll): IPoll => ({
-                ...poll,
-                description: poll.description ?? undefined,
-                banner: poll.banner ?? undefined,
-                dataLogs: logs ? (poll.dataLogs as unknown as DataLog[] | null) ?? undefined : undefined,
-            }));
-
-
-            return { polls: formattedPolls };
+            
+            return { polls };
         } catch (error) {
             console.error("[ERROR] myPolls:", error);
             throw new Error("Failed to fetch polls");
@@ -406,7 +416,7 @@ export class PollService {
                         polls: {
                             some: {
                                 id: pollId,
-                                isVoteEnd: false, 
+                                isVoteEnd: false,
                             }
                         },
                         guests: {
@@ -418,7 +428,7 @@ export class PollService {
                     }
                 });
 
-                return !!event; 
+                return !!event;
             }
 
             // Check if user is a participant
