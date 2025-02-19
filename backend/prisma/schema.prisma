@@ -62,7 +62,6 @@ model Poll {
   options      Option[]
   whitelist    WhitelistUser[]
   votes        Vote[]
-  guestVotes   Guest[]
   voteRestrict VoteRestriction[]
 
   createdAt  DateTime @default(now())
@@ -112,8 +111,6 @@ model Guest {
   key     String
   eventId String?
   event   Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  pollId  String?
-  poll    Poll?   @relation(fields: [pollId], references: [id], onDelete: Cascade)
 
   votes   Vote[]
   guestVotes VoteRestriction[]

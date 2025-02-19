@@ -85,7 +85,6 @@ CREATE TABLE "Guest" (
     "name" TEXT NOT NULL,
     "key" TEXT NOT NULL,
     "eventId" TEXT,
-    "pollId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -153,9 +152,6 @@ ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_pollId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "Guest" ADD CONSTRAINT "Guest_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Guest" ADD CONSTRAINT "Guest_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "VoteRestriction" ADD CONSTRAINT "VoteRestriction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
