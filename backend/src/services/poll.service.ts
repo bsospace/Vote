@@ -135,6 +135,7 @@ export class PollService {
                             guests: isGuest ? { where: { id: userId, deletedAt: null } } : undefined,
                         },
                     },
+                    voteRestrict: true,
                 },
             });
 
