@@ -107,7 +107,6 @@ class AuthMiddleware {
           guest: true,
           email: `${userDatabase.name}@${envConfig.app.serviceName}.bsospace.com`,
           avatar: "",
-          dataLogs: Array.isArray(userDatabase.dataLogs) ? (userDatabase.dataLogs as unknown as DataLog[]) : [],
         };
 
         await cacheService.set(`guest:${decode.sub}`, user, 600);
@@ -176,7 +175,6 @@ class AuthMiddleware {
         user = {
           ...userDatabase,
           avatar: userDatabase.avatar || "",
-          dataLogs: Array.isArray(userDatabase.dataLogs) ? (userDatabase.dataLogs as unknown as DataLog[]) : [],
         };
 
         await cacheService.set(`users:${jwtPayload.email}`, user, 600);
