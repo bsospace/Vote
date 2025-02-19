@@ -41,7 +41,6 @@ CREATE TABLE "Poll" (
     "isVoteEnd" BOOLEAN NOT NULL DEFAULT false,
     "banner" TEXT,
     "publishedAt" TIMESTAMP(3),
-    "voteCount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -70,7 +69,6 @@ CREATE TABLE "WhitelistUser" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "eventId" TEXT,
-    "pollId" TEXT,
     "point" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -85,6 +83,7 @@ CREATE TABLE "Guest" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "key" TEXT NOT NULL,
+    "point" INTEGER NOT NULL DEFAULT 0,
     "eventId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -113,6 +112,7 @@ CREATE TABLE "VoteRestriction" (
 CREATE TABLE "Vote" (
     "id" TEXT NOT NULL,
     "pollId" TEXT NOT NULL,
+    "point" INTEGER NOT NULL DEFAULT 0,
     "optionId" TEXT NOT NULL,
     "userId" TEXT,
     "guestId" TEXT,
@@ -162,9 +162,6 @@ ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Guest" ADD CONSTRAINT "Guest_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
