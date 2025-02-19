@@ -5,6 +5,7 @@ import { PublicRoute } from './PubilcRoute'
 import { LoginPage} from '@/pages/auth/LogIn'
 import HomePage from '@/pages/Home'
 import Callback from '@/pages/auth/Callback'
+import PollDetails from '@/pages/PollDetails'
 
 const publicRoutes = [
   { path: ROUTES.LOGIN, element: <LoginPage /> },
@@ -14,6 +15,7 @@ const publicRoutes = [
 
 const privateRoutes = [
     {path: ROUTES.HOME, element: <HomePage />},
+    {path: ROUTES.Poll.VIEW, element: <PollDetails />},
 //   { path: ROUTES.HOME, element: <HomePage /> },
 //   { path: ROUTES.PROFILE, element: <ProfilePage /> },
 //   { path: ROUTES.CALENDAR, element: <CalendarPage /> },
