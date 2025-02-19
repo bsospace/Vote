@@ -68,7 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setIsAuthenticated(true)
       setAccessToken(credentials.accessToken)
-      alert(credentials.accessToken)
       localStorage.setItem('accessToken', credentials.accessToken)
       window.location.href = redirect
     } finally {
