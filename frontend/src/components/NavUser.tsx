@@ -5,6 +5,8 @@ import {
     CreditCard,
     LogOut,
     Sparkles,
+    Calendar, 
+    Vote,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,9 +20,14 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IUser } from "@/interfaces/interfaces";
+import { Link } from "react-router-dom";
+
+interface User extends IUser {
+    isGuest: boolean
+}
 
 interface NavUserProps {
-    user: IUser;
+    user: User;
     logout: () => void;
 }
 export function NavUser({ user, logout }: NavUserProps) {
@@ -59,23 +66,39 @@ export function NavUser({ user, logout }: NavUserProps) {
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem className="opacity-50 cursor-not-allowed">
-                        <Sparkles />
-                        Upgrade to Pro
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        <BadgeCheck />
-                        Your Account
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="opacity-50 cursor-not-allowed">
-                        <CreditCard />
-                        Billing
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
+                {
+                    !user.isGuest && (
+                        <>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem className="opacity-50 cursor-not-allowed">
+                                    <Sparkles />
+                                    Upgrade to Pro
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem>
+                                    <BadgeCheck />
+                                    Your Account
+                                </DropdownMenuItem>
+                                <Link to="/events">
+                                 <DropdownMenuItem>
+                                    <Calendar />
+                                    Manage Events
+                                </DropdownMenuItem>
+                                </Link>
+                                <DropdownMenuItem>
+                                    <Vote className="w-6 h-6"/>
+                                    Manage Poll
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="opacity-50 cursor-not-allowed">
+                                    <CreditCard />
+                                    Billing
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </>
+                    )
+                }
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
                     <LogOut />
