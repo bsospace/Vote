@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import FlipCard from "@/components/animata/card/flip-card";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Key } from "lucide-react";
+import { Key, Scan, LogIn, Shield, Vote } from "lucide-react";
 import { useAuth } from "@/hooks/UseAuth";
-import { FaGoogle } from "react-icons/fa";
+import { FaDiscord, FaGithub, FaGoogle } from "react-icons/fa";
 import QRScanner from "@/components/qrcode/QrcodeScanner";
 import {
   AlertDialog,
@@ -15,11 +15,14 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export function LoginPage() {
   const [flip, setFlip] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [accessKey, setAccessKey] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const { oauthLogin, loginGuest } = useAuth();
 
   interface QRCodeResult {
@@ -34,143 +37,173 @@ export function LoginPage() {
   };
 
   const handleGuestAccess = () => {
-    if (!accessKey) {
-      return;
-    }
-
+    if (!accessKey) return;
     loginGuest(accessKey, "/");
-
-    console.log("Guest access with key:", accessKey);
-
   };
 
-  // Implement guest access logic here
+  const OAuthButton = ({ provider, icon: Icon, color, hoverColor }: any) => (
+    <Button
+      className={`w-full rounded-xl py-6 flex items-center justify-center space-x-3 ${color} ${hoverColor} text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+      onClick={() => oauthLogin(provider)}
+      disabled={!acceptedTerms}
+    >
+      <Icon className="w-6 h-6" />
+      <span className="text-base">Continue with {provider.charAt(0).toUpperCase() + provider.slice(1)}</span>
+    </Button>
+  );
 
+  return (
+    <div className="h-screen w-full flex items-center justify-center overflow-hidden relative">
+      {/* Decorative Elements */}
+      <div className="absolute w-64 h-64 rounded-full bg-gradient-to-r from-orange-400 to-red-300 blur-3xl opacity-40 -top-20 -left-20 animate-pulse"></div>
+      <div className="absolute w-80 h-80 rounded-full bg-gradient-to-r from-yellow-300 to-orange-200 blur-3xl opacity-40 -bottom-32 -right-20 animate-pulse" style={{ animationDelay: "1.5s" }}></div>
 
-return (
-  <div className="min-h-screen flex items-center justify-center p-4">
-    <div className="flex flex-col items-center">
-      <div className="mb-8 flex space-x-4">
-        <Button
-          onClick={() => setFlip(false)}
-          className={`px-6 py-2 rounded-lg transition-all duration-300 ${!flip
-              ? "bg-blue-600 text-white shadow-lg scale-105"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-        >
-          Sign in with Google
-        </Button>
-        <Button
-          onClick={() => setFlip(true)}
-          className={`px-6 py-2 rounded-lg transition-all duration-300 ${flip
-              ? "bg-blue-600 text-white shadow-lg scale-105"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-        >
-          Continue as Guest
-        </Button>
-      </div>
-
-      <FlipCard
-        flip={flip}
-        frontContent={
-          <Card className="p-8 h-96 w-full shadow-xl">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome Back
-                </h1>
-                <p className="text-gray-500 mt-2">
-                  Sign in with your Google account
-                </p>
+      <div className="w-full max-w-md relative z-10">
+        <Card className="border-none shadow-2xl rounded-3xl bg-white/90 backdrop-blur-xl p-10 border border-white/20">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-600 to-red-500 p-0.5 shadow-lg">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                  <Vote className="w-8 h-8 text-orange-600" />
+                </div>
               </div>
-
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <FaGoogle className="w-8 h-8 text-red-500" />
-              </div>
-
-              <Button
-                className="w-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center space-x-2"
-                onClick={() => oauthLogin("google")}
-              >
-                <FaGoogle className="w-5 h-5" />
-                <span>Sign in with Google</span>
-              </Button>
-
-              <p className="text-sm text-gray-500">
-                By continuing, you agree to our {" "}
-                <a href="#" className="text-blue-600 hover:underline">
-                  Terms of Service
-                </a>
-              </p>
             </div>
-          </Card>
-        }
-        backContent={
-          <Card className="p-8 h-96 w-full shadow-xl">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Guest Access
-                </h1>
-                <p className="text-gray-500 mt-2">
-                  Scan QR code or enter access key
-                </p>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-700 to-red-600 bg-clip-text text-transparent">Welcome</h1>
+            <p className="text-gray-600 mt-2 font-medium">vote.bsospace.com</p>
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex bg-gray-100/80 rounded-full p-1 shadow-inner">
+              <Button
+                variant="ghost"
+                onClick={() => setFlip(false)}
+                className={`rounded-full px-10 py-2.5 transition-all duration-300 font-medium ${!flip ? "bg-white text-orange-700 shadow-md" : "text-gray-600 hover:text-gray-900"
+                  }`}
+              >
+                Sign in
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setFlip(true)}
+                className={`rounded-full px-10 py-2.5 transition-all duration-300 font-medium ${flip ? "bg-white text-orange-700 shadow-md" : "text-gray-600 hover:text-gray-900"
+                  }`}
+              >
+                Guest
+              </Button>
+            </div>
+          </div>
+
+          {/* Flip Card Content */}
+          <FlipCard
+            flip={flip}
+            frontContent={
+              <div className="space-y-6">
+                <OAuthButton provider="google" icon={FaGoogle} color="bg-red-500" hoverColor="hover:bg-red-600" />
+                <OAuthButton provider="discord" icon={FaDiscord} color="bg-indigo-600" hoverColor="hover:bg-indigo-700" />
+                <OAuthButton provider="github" icon={FaGithub} color="bg-gray-800" hoverColor="hover:bg-gray-900" />
+
+                {/* Terms Checkbox */}
+                <div className="flex items-start space-x-3 bg-orange-50 p-5 rounded-xl border border-orange-200">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                    className="mt-1 border-orange-300"
+                  />
+                  <Label htmlFor="terms" className="text-sm text-orange-800">
+                    I accept the{" "}
+                    <a href="#" className="text-orange-600 hover:underline font-medium">Terms of Service</a> and{" "}
+                    <a href="#" className="text-orange-600 hover:underline font-medium">Privacy Policy</a>
+                  </Label>
+                </div>
               </div>
+            }
+            backContent={
+              <div className="space-y-7">
 
-              <AlertDialog open={showScanner} onOpenChange={setShowScanner}>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    Scan QR Code
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-md">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Scan QR Code</AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <div className="mt-2">
-                    <QRScanner onResult={handleQRCodeScanned} />
-                  </div>
-                  <AlertDialogCancel className="mt-4">Cancel</AlertDialogCancel>
-                </AlertDialogContent>
-              </AlertDialog>
+                {/* Guest Access Header */}
+                <div className="flex flex-col items-center space-y-5">
+                  <p className="text-gray-700 font-medium text-lg">Enter your access key or scan QR</p>
+                </div>
 
-              <div className="w-full space-y-4">
-                <div className="relative">
+                {/* Access Key Input with Icon */}
+                <div className="relative group">
                   <Input
                     type="text"
                     placeholder="Enter access key"
                     value={accessKey}
                     onChange={(e) => setAccessKey(e.target.value)}
-                    className="pr-10"
+                    className="rounded-xl py-6 pl-6 pr-12 bg-gray-50/90  group-hover:border-orange-300 focus:border-orange-400 focus:ring focus:ring-orange-100 shadow-inner text-lg transition-all duration-200"
                   />
-                  <Key className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-orange-400 opacity-70 group-hover:opacity-100">
+                    <LogIn className="w-6 h-6" />
+                  </div>
                 </div>
 
-                <Button
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                  onClick={handleGuestAccess}
-                  disabled={!accessKey}
-                >
-                  Continue as Guest
-                </Button>
-              </div>
+                {/* QR Scanner & Continue Button */}
+                <div className="grid grid-cols-2 gap-5 pt-2">
+                  {/* QR Scanner Button */}
+                  <AlertDialog open={showScanner} onOpenChange={setShowScanner}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="rounded-xl py-6 border-gray-300 bg-gray-50 text-gray-700 hover:bg-orange-50 hover:text-orange-600 shadow-md hover:shadow-lg transition-all duration-300 group flex items-center justify-center space-x-2"
+                      >
+                        <Scan className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform duration-200" />
+                        <span className="font-medium">Scan QR</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-3xl border-none shadow-2xl bg-white/95 backdrop-blur-xl p-6">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-2xl font-bold text-center text-orange-600">
+                          Scan QR Code
+                        </AlertDialogTitle>
+                      </AlertDialogHeader>
+                      <QRScanner onResult={handleQRCodeScanned} />
+                      <AlertDialogCancel className="rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 mt-4">
+                        Cancel
+                      </AlertDialogCancel>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-              <p className="text-sm text-gray-500">Want full access?</p>
-              <Button
-                variant="link"
-                onClick={() => setFlip(false)}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                Sign in with Google instead
-              </Button>
-            </div>
-          </Card>
-        }
-      />
+                  {/* Continue Button */}
+                  <Button
+                    variant={accessKey ? "default" : "outline"}
+                    onClick={handleGuestAccess}
+                    disabled={!accessKey}
+                    className={`rounded-xl py-6 w-full font-medium shadow-md transition-all duration-300 group flex items-center justify-center space-x-2 ${accessKey
+                        ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:shadow-lg"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                  >
+                    <span>Continue</span>
+                    {accessKey && (
+                      <span className="ml-2 inline-block transform group-hover:translate-x-1 transition-transform">
+                        →
+                      </span>
+                    )}
+                  </Button>
+                </div>
+
+
+                {/* Extra Info Section */}
+                <div className="pt-3">
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100 text-sm text-orange-800 flex items-start">
+                    <div className="flex-shrink-0 mt-1">
+                      <Shield className="w-4 h-4 text-orange-500" />
+                    </div>
+                    <p className="ml-3">Guest access is temporary and provides limited features. For full access, please sign in with your account.</p>
+                  </div>
+                </div>
+              </div>
+            }
+          />
+        </Card>
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default LoginPage;

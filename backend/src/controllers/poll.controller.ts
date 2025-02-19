@@ -9,6 +9,9 @@ export class PollController {
   constructor(private pollService: PollService) {
     this.getPoll = this.getPoll.bind(this);
     this.getPolls = this.getPolls.bind(this);
+    this.myPolls = this.myPolls.bind(this);
+    this.publicPolls = this.publicPolls.bind(this);
+    this.myVotedPolls = this.myVotedPolls.bind(this);
   }
 
   /**
@@ -55,6 +58,110 @@ export class PollController {
     }
   }
 
+
+  /**
+   * Get all polls user has participated in
+   * @param req - Request
+   * @param res - Response
+   * @param next - NextFunction
+   * @returns - JSON
+   */
+  public async myPolls(req: Request, res: Response, next: NextFunction): Promise<any> {
+    try {
+      const user = req.user
+
+      // Check if user exists
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "User not found",
+          error: "User not found"
+        });
+      }
+
+      // Fetch polls
+      const polls = await this.pollService.myPolls(user.id, user.guest);
+
+      res.status(200).json({
+        message: "Polls fetched successfully",
+        data: polls
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch polls",
+        error: error
+      });
+    }
+  }
+
+  /**
+   * Get all polls user has voted ins
+   * @param req - Request
+   * @param res - Response
+   * @param next - NextFunction
+   * @returns - JSON
+   */
+
+  public async myVotedPolls(req: Request, res: Response, next: NextFunction): Promise<any> {
+    try {
+      const user = req.user
+
+      // Check if user exists
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "User not found",
+          error: "User not found"
+        });
+      }
+
+      // Fetch polls
+      const polls = await this.pollService.myVotedPolls(user.id, user.guest);
+
+      res.status(200).json({
+        message: "Polls fetched successfully",
+        data: polls
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch polls",
+        error: error
+      });
+    }
+  }
+
+  public async publicPolls(req: Request, res: Response, next: NextFunction): Promise<any> {
+    try {
+
+      const page = Number(req.query.page) || 1;
+      const pageSize = Number(req.query.pageSize) || 10;
+      const search = req.query.search as string;
+      const logs = req.query.logs === "true";
+
+      const polls = await this.pollService.publicPolls(
+        page,
+        pageSize,
+        search,
+        logs
+      );
+
+      res.status(200).json({
+        message: "Polls fetched successfully",
+        data: { polls }
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch polls",
+        error: error
+      });
+    }
+  }
+
   /**
    * Get a poll by ID 
    * @param req - Request
@@ -67,6 +174,27 @@ export class PollController {
     try {
 
       const { pollId } = req.params;
+      const user = req.user;
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "User not found",
+          error: "User not found"
+        });
+      }
+
+      // Check if user or guest can vote on poll
+      const canGetPoll = await this.pollService.userCanVote(pollId, user.id, user.guest);
+
+      // If user cannot vote on poll
+      if (!canGetPoll) {
+        return res.status(403).json({
+          success: false,
+          message: "You cannot vote on this poll",
+          error: "You cannot vote on this poll"
+        });
+      }
 
       const polls = await this.pollService.getPoll(pollId);
 

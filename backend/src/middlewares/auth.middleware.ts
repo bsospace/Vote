@@ -93,9 +93,10 @@ class AuthMiddleware {
       const isValidGuest = this.cryptoService.verifyAccessTokenGuest(token, envConfig.app.serviceName);
       if (!isValidGuest) return null;
 
-      let user = await cacheService.get<UserEx>(`guest:${decode.id}`);
+      let user = await cacheService.get<UserEx>(`guest:${decode.sub}`);
+
       if (!user) {
-        const userDatabase = await this.userService.getGuestUserById(decode.id);
+        const userDatabase = await this.userService.getGuestUserById(decode.sub);
         if (!userDatabase) return null;
 
         user = {
@@ -109,7 +110,7 @@ class AuthMiddleware {
           dataLogs: Array.isArray(userDatabase.dataLogs) ? (userDatabase.dataLogs as unknown as DataLog[]) : [],
         };
 
-        await cacheService.set(`guest:${decode.id}`, user, 600);
+        await cacheService.set(`guest:${decode.sub}`, user, 600);
       }
 
       return { ...user, guest: true };
