@@ -18,4 +18,9 @@ export const ROUTES = {
   LOGIN: '/login', 
   CALLBACK:'/callback',         // เข้าสู่ระบบ
   PROFILE: '/profile',      // โปรไฟล์ AT03.1.2
+  Poll: {
+    BASE: '/polls',         // แบบสำรวจ AT03.1.3
+    CREATE: '/polls/create', // สร้างแบบสำรวจ AT03.1.3.1
+    VIEW: '/polls/:id',      // ดูแบบสำรวจ AT03.1.3.2
+  }
 } as const;
