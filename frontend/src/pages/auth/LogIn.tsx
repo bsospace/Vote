@@ -37,7 +37,7 @@ export function LoginPage() {
   };
 
   const handleGuestAccess = () => {
-    if (!accessKey || !acceptedTerms) return;
+    if (!accessKey) return;
     loginGuest(accessKey, "/");
   };
 
@@ -170,16 +170,16 @@ export function LoginPage() {
 
                   {/* Continue Button */}
                   <Button
-                    variant={accessKey && acceptedTerms ? "default" : "outline"}
+                    variant={accessKey ? "default" : "outline"}
                     onClick={handleGuestAccess}
-                    disabled={!accessKey || !acceptedTerms}
-                    className={`rounded-xl py-6 w-full font-medium shadow-md transition-all duration-300 group flex items-center justify-center space-x-2 ${accessKey && acceptedTerms
+                    disabled={!accessKey}
+                    className={`rounded-xl py-6 w-full font-medium shadow-md transition-all duration-300 group flex items-center justify-center space-x-2 ${accessKey
                         ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:shadow-lg"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                   >
                     <span>Continue</span>
-                    {accessKey && acceptedTerms && (
+                    {accessKey && (
                       <span className="ml-2 inline-block transform group-hover:translate-x-1 transition-transform">
                         →
                       </span>
