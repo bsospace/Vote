@@ -14,19 +14,23 @@ export const API_ENDPOINTS = {
 } as const;
 
 export const ROUTES = {
-  HOME: '/',                // หน้าหลัก
+  HOME: '/',              
   LOGIN: '/login', 
-  CALLBACK:'/callback',         // เข้าสู่ระบบ
-  PROFILE: '/profile',      // โปรไฟล์ AT03.1.2
+  CALLBACK:'/callback',       
+  PROFILE: '/profile',      
+
+  // Events
   EVENT: {
-    BASE: '/events',         // กิจกรรม AT03.1.1
+    BASE: '/events',      
     VIEW: '/event/view',
     CREATE: '/event/create',
     EDIT: '/event/edit',
-  },          // กิจกรรม AT03.1.3
-  Poll: {
-    BASE: '/polls',         // แบบสำรวจ AT03.1.3
-    CREATE: '/polls/create', // สร้างแบบสำรวจ AT03.1.3.1
-    VIEW: '/polls/:id',      // ดูแบบสำรวจ AT03.1.3.2
+  }, 
+
+  // Polls
+  POLL: {
+    BASE: '/polls',       
+    CREATE: '/polls/create',
+    VIEW: '/polls/:id',   
   }
 } as const;

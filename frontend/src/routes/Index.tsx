@@ -19,8 +19,8 @@ const publicRoutes = [
 const privateRoutes = [
     {path: ROUTES.HOME, element: <HomePage />},
     {path: ROUTES.EVENT.BASE, element: <Events />},
-    {path: ROUTES.EVENT.CREATE, element: <CreateEvent />}
-    {path: ROUTES.Poll.VIEW, element: <PollDetails />},
+    {path: ROUTES.EVENT.CREATE, element: <CreateEvent />},
+    {path: ROUTES.POLL.VIEW, element: <PollDetails />},
 //   { path: ROUTES.HOME, element: <HomePage /> },
 //   { path: ROUTES.PROFILE, element: <ProfilePage /> },
 //   { path: ROUTES.CALENDAR, element: <CalendarPage /> },
