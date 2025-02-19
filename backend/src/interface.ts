@@ -12,7 +12,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IEvent {
@@ -27,7 +27,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IPoll {
@@ -52,7 +52,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IOption {
@@ -67,7 +67,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IWhitelistUser {
@@ -82,7 +82,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IGuest {
@@ -98,7 +98,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IVoteRestriction {
@@ -114,7 +114,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface IVote {
@@ -130,7 +130,7 @@ export interface IUser {
     createdAt: Date;
     updatedAt: Date;
     deletedAt?: Date | null;
-    dataLogs?: DataLog[];
+
   }
   
   export interface DataLog {

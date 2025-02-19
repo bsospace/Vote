@@ -9,6 +9,7 @@ export class EventService {
     public async getEvents(
         page: number = 1,
         pageSize: number = 10,
+        userId: string,
         search?: string,
         logs?: boolean
     ): Promise<{ events: IEvent[]; totalCount: number } | null> {
@@ -19,10 +20,13 @@ export class EventService {
 
             // ค้นหา Event ตามเงื่อนไขที่ระบุ และกรองเฉพาะที่ยังไม่ถูกลบ (deletedAt: null)
             const whereCondition: Prisma.EventWhereInput = {
-                deletedAt: null, // ✅ ตรวจสอบว่าข้อมูลยังไม่ถูกลบ
+                deletedAt: null,
                 ...(search && {
                     name: { contains: search, mode: Prisma.QueryMode.insensitive },
                 }),
+                OR: [
+                    { userId },
+                ],
             };
 
             // ดึง Events พร้อมกำหนด Fields ที่ต้องการ
@@ -52,11 +56,11 @@ export class EventService {
         }
     }
 
-    public async getEventById(eventId: string): Promise<Partial<IEvent> | null> {
+    public async getEventById(eventId: string, userId: string): Promise<Partial<IEvent> | null> {
         try {
             // ค้นหา Event ด้วย ID ที่ระบุ
             const event = await this.prisma.event.findFirst({
-                where: { id: eventId , deletedAt: null},
+                where: { id: eventId, deletedAt: null, userId },
                 include: {
                     polls: true,
                 },
@@ -71,12 +75,10 @@ export class EventService {
             const formattedEvent: Partial<IEvent> = {
                 ...event,
                 description: event.description ?? undefined,
-                dataLogs: event.dataLogs ? (event.dataLogs as unknown as DataLog[]) : undefined,
                 polls: event.polls.map(poll => ({
                     ...poll,
                     description: poll.description ?? undefined,
                     banner: poll.banner ?? undefined,
-                    dataLogs: poll.dataLogs ? (poll.dataLogs as unknown as DataLog[]) : undefined,
                 })),
             };
 

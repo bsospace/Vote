@@ -69,7 +69,6 @@ CREATE TABLE "WhitelistUser" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "eventId" TEXT,
-    "pollId" TEXT,
     "point" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -84,6 +83,7 @@ CREATE TABLE "Guest" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "key" TEXT NOT NULL,
+    "point" INTEGER NOT NULL DEFAULT 0,
     "eventId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -112,6 +112,7 @@ CREATE TABLE "VoteRestriction" (
 CREATE TABLE "Vote" (
     "id" TEXT NOT NULL,
     "pollId" TEXT NOT NULL,
+    "point" INTEGER NOT NULL DEFAULT 0,
     "optionId" TEXT NOT NULL,
     "userId" TEXT,
     "guestId" TEXT,
@@ -123,11 +124,26 @@ CREATE TABLE "Vote" (
     CONSTRAINT "Vote_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "FailedJob" (
+    "id" TEXT NOT NULL,
+    "jobId" TEXT NOT NULL,
+    "queueName" TEXT NOT NULL,
+    "data" JSONB NOT NULL,
+    "error" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "FailedJob_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WhitelistUser_userId_eventId_key" ON "WhitelistUser"("userId", "eventId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FailedJob_jobId_key" ON "FailedJob"("jobId");
 
 -- AddForeignKey
 ALTER TABLE "Event" ADD CONSTRAINT "Event_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -146,9 +162,6 @@ ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "WhitelistUser" ADD CONSTRAINT "WhitelistUser_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Guest" ADD CONSTRAINT "Guest_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;

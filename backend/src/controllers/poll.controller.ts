@@ -196,7 +196,7 @@ export class PollController {
         });
       }
 
-      const polls = await this.pollService.getPoll(pollId);
+      const polls = await this.pollService.getPoll(pollId, user.id, user.guest);
 
       if (!polls) {
         return res.status(404).json({

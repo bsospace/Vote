@@ -25,7 +25,18 @@ export class EventController {
 
             const eventId = req.params.eventId;
 
-            const event = await this.eventService.getEventById(eventId);
+            const user = req.user;
+
+            // Check if user is authenticated
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized",
+                });
+            }
+
+
+            const event = await this.eventService.getEventById(eventId, user.id);
 
             if (!event) {
                 return res.status(404).json({
@@ -64,7 +75,18 @@ export class EventController {
             const search = req.query.search as string;
             const logs = req.query.logs === "true";
 
-            const events = await this.eventService.getEvents(page, pageSize, search, logs);
+            const user = req.user;
+
+            // Check if user is authenticated
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized",
+                });
+            }
+
+
+            const events = await this.eventService.getEvents(page, pageSize, user.id, search, logs);
 
             return res.status(200).json({
                 success: true,
