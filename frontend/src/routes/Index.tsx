@@ -7,7 +7,8 @@ import HomePage from '@/pages/Home'
 import Callback from '@/pages/auth/Callback'
 import Events from '@/pages/events/Index'
 import CreateEvent from '@/pages/events/CreateEvent'
-import path from 'path'
+import PollDetails from '@/pages/PollDetails'
+
 
 const publicRoutes = [
   { path: ROUTES.LOGIN, element: <LoginPage /> },
@@ -19,6 +20,7 @@ const privateRoutes = [
     {path: ROUTES.HOME, element: <HomePage />},
     {path: ROUTES.EVENT.BASE, element: <Events />},
     {path: ROUTES.EVENT.CREATE, element: <CreateEvent />}
+    {path: ROUTES.Poll.VIEW, element: <PollDetails />},
 //   { path: ROUTES.HOME, element: <HomePage /> },
 //   { path: ROUTES.PROFILE, element: <ProfilePage /> },
 //   { path: ROUTES.CALENDAR, element: <CalendarPage /> },

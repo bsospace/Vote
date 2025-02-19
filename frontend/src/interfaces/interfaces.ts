@@ -34,6 +34,7 @@ export interface IUser {
     id: string;
     eventId?: string | null;
     event?: IEvent;
+    voteCount?: number | null;
     userId: string;
     owner?: IUser;
     question: string;
