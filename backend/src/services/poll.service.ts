@@ -432,20 +432,23 @@ export class PollService {
             }
 
             // Check if user is a participant
-            const canVote = await this.prisma.poll.findFirst({
+            const canVote = await this.prisma.event.findFirst({
                 where: {
-                    id: pollId,
-                    isVoteEnd: false,
+                    polls: {
+                        some: {
+                            id: pollId,
+                            isVoteEnd: false,
+                        }
+                    },
                     whitelist: {
                         some: {
                             userId: userId,
                             deletedAt: null,
                         }
-                    },
-                    deletedAt: null,
+                    }
                 }
             });
-
+            
             return !!canVote;
 
         } catch (error) {
