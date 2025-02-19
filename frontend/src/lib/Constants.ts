@@ -18,4 +18,10 @@ export const ROUTES = {
   LOGIN: '/login', 
   CALLBACK:'/callback',         // เข้าสู่ระบบ
   PROFILE: '/profile',      // โปรไฟล์ AT03.1.2
+  EVENT: {
+    BASE: '/events',         // กิจกรรม AT03.1.1
+    VIEW: '/event/view',
+    CREATE: '/event/create',
+    EDIT: '/event/edit',
+  },          // กิจกรรม AT03.1.3
 } as const;
